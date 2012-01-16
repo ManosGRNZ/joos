@@ -1,5 +1,9 @@
 package gr.structuraldesign.analysis;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
 public class Node {
 	
 	// Coordinates
@@ -19,7 +23,7 @@ public class Node {
 		this.z = z;
 		this.restrainDX=this.restrainDY=this.restrainDZ=this.restrainMX=this.restrainMY=this.restrainMZ=false;		
 	}
-
+	
 	public double getX() {
 		return x;
 	}
@@ -91,6 +95,13 @@ public class Node {
 	public void setRestrainMZ(boolean restrainMZ) {
 		this.restrainMZ = restrainMZ;
 	}
-
+	
+	public void setRestrainAllD(boolean rsD) {
+		this.restrainDX=this.restrainDY=this.restrainDZ=rsD;
+	}
+	
+	public void setRestrainAllM(boolean rsD) {
+		this.restrainMX=this.restrainMY=this.restrainMZ=rsD;
+	}
 	
 }
