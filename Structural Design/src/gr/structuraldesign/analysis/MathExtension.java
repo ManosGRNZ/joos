@@ -94,11 +94,13 @@ public class MathExtension {
 	 * @param matrix
 	 * @return double[][]
 	 */
-	public static double[][] matrixInverse(double[][] matrix) {
+	public static double[][] matrixInverse(double[][] mat) {
 		int x,y,line;
-		int dim = matrix.length;
+		int dim = mat.length;
+		double[][] matrix = mat.clone();  // All changes are made to a temporary matrix
 		double[][] reverse = new double[dim][dim];
 		
+		// Set reverse=I
 		for (x=0; x<dim; x++) {
 			for (y=0; y<dim; y++) {
 				if (x==y) reverse[x][y]=1; else reverse[x][y]=0;
