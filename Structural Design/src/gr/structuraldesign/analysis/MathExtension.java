@@ -1,7 +1,7 @@
 package gr.structuraldesign.analysis;
 
 /**
- * This class provides tools for mathematics through static methods.    
+ * This class provides mathematics tools through static methods.    
  * 
  * @author Manos Bairaktaris
  *
