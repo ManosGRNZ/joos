@@ -29,7 +29,7 @@ public class Structure implements Serializable {
 			String line;
 			String[] word;
 						
-			int index=0;
+			int index=1;
 			double x,y,z;
 			String degreeOfFreedom;
 						
@@ -39,7 +39,7 @@ public class Structure implements Serializable {
 				y = Double.parseDouble(word[1].trim());
 				z = Double.parseDouble(word[2].trim());
 				degreeOfFreedom = word[3].trim();				
-				buildingNodes.add(new Node(x,y,z));
+				buildingNodes.add(new Node(index,x,y,z));
 				
 				if (word.length>3) for (int i=3; i<word.length; i++) {
 					if (degreeOfFreedom=="FIX") {
@@ -96,14 +96,14 @@ public class Structure implements Serializable {
 				sect = buildingSections.get(sectionIndex);
 				localAngle = Double.parseDouble(word[2].trim());
 				
-				int[] nodes = new int[word.length-3];
-				for (int i=3; i<word.length; i++) {
-					nodes[i-3] = Integer.parseInt(word[i].trim());
+				Node[] nodes = new Node[word.length-3];
+				for (int i=3; i<word.length; i++) {					
+					nodes[i-3] = getNodeByIndex( Integer.parseInt( word[i].trim() ) );
 				}
 							
 				switch (elementType) {
 				case "BEAM":
-					buildingElements.add(new Beam(sect,localAngle,nodes));
+					buildingElements.add(new Beam(sectionIndex,sect,localAngle,nodes));
 					break;
 
 				default:
@@ -119,6 +119,16 @@ public class Structure implements Serializable {
 			System.out.println("problem with file I/O in Node.getAllNodes");
 			ex.printStackTrace();
 		}
+	}
+	
+	private Node getNodeByIndex(int index) {
+		Node returnNode=buildingNodes.get(0);
+		for (Node n : buildingNodes) {
+			if (n.getIndex()==index) {
+				returnNode=n;
+			}
+		}
+		return returnNode;
 	}
 
 }

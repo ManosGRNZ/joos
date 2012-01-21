@@ -1,27 +1,60 @@
 package gr.structuraldesign.analysis;
 
+/**
+ * This is a class containing general data for materials
+ * It supports only very basic nonlinear data.  
+ * @author Manos Bairaktaris
+ *
+ */
+
 public class Material {
 	
 	private double E,Eh,G,v;
 	private double yieldStrain;
-
-
-	public Material(double e, double eh, double g, double v, double yieldStrain) {
-		super();
-		E = e;
-		Eh = eh;
-		G = g;
+	private double ultimateStrain;
+	/**
+	 * Constructor for material objects with full parameters
+	 * @param E  Young modulus
+	 * @param Eh Modulus after yield strain
+	 * @param G Shear modulus
+	 * @param v Poisson ratio
+	 * @param yieldStrain
+	 * @param ultimateStrain
+	 */
+	public Material(double E, double Eh, double G, double v, double yieldStrain, double ultimateStrain) {
+		this.E = E;
+		this.Eh = Eh;
+		this.G = G;
 		this.v = v;
 		this.yieldStrain = yieldStrain;
+		this.setUltimateStrain(ultimateStrain);
 	}
-	
-	public Material(double e, double v) {
-		super();
-		E = e;
+	/**
+	 * Constructor with few parameters
+	 * @param E Young modulus
+	 * @param v Poisson ratio
+	 */
+	public Material(double E, double v) {
+		this.E = E;
 		this.v = v;
-		G = E/(2*(1+v));
-		Eh = 0;
-		yieldStrain = 1;
+		G = E/(2.*(1.+v));
+		Eh = 0.1*E;
+		yieldStrain = Double.MAX_VALUE;
+		ultimateStrain = Double.MAX_VALUE;
+	}
+	/**
+	 * Constructor with only E (young modulus)
+	 * considering a default poisson ratio
+	 * v=0.2
+	 * @param E Young modulus
+	 */
+	public Material(double E) {
+		this.E = E;
+		this.v = 0.2;
+		G = E/(2.*(1.+v));		
+		Eh = 0.1*E;
+		yieldStrain = Double.MAX_VALUE;
+		ultimateStrain = Double.MAX_VALUE;
 	}
 
 	public double stress(double strain) {
@@ -81,6 +114,14 @@ public class Material {
 			return 0; 
 		else
 			return x/Math.abs(x);
+	}
+
+	public double getUltimateStrain() {
+		return ultimateStrain;
+	}
+
+	public void setUltimateStrain(double ultimateStrain) {
+		this.ultimateStrain = ultimateStrain;
 	}
 	
 }

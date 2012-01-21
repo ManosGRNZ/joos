@@ -13,9 +13,10 @@ import java.util.Vector;
  */
 public abstract class Element {
 	
+	private int index;
 	private Section sect;
 	
-	private int[] nodes;
+	private Node[] nodes;
 	
 	public Section getSect() {
 		return sect;
@@ -25,15 +26,28 @@ public abstract class Element {
 		this.sect = sect;
 	}
 	
-	public int[] getNodes() {
+	public Node[] getNodes() {
 		return nodes;
 	}
 
-	public void setNodes(int[] nodes) {
+	public void setNodes(Node[] nodes) {
 		this.nodes = nodes;
+		for (Node i : this.nodes) {
+			if (!i.connectedElements.contains(this)) {
+				i.connectedElements.add(this);
+			}			
+		}
+	}
+	
+	public int getIndex() {
+		return index;
 	}
 
-	public double[][] localStiffnessMatrix;
+	public void setIndex(int index) {
+		this.index = index;
+	}
+	
+	public double[][] localStiffnessMatrix_GlobalSystem;
 	
 	public double[][] transformationMatrix;
 	
