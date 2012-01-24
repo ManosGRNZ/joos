@@ -49,6 +49,13 @@ public abstract class Element {
 	
 	public double[][] localStiffnessMatrix_GlobalSystem;
 	
+	/**
+	 * This is essential to be declared for all subclasses
+	 * in order to be re-assembled for each new geometrically 
+	 * non linear analysis.  
+	 */
+	abstract public void setTransformationMatrix();
+	
 	public double[][] transformationMatrix;
 	
 	/**

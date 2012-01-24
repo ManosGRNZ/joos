@@ -6,8 +6,12 @@ public class Beam extends Element {
 	
 	private double localAngle;
 	
-	private double EA, GAy, GAz, GIt, EIy, EIz; // stiffness
-	private double l; // length;
+	//private double EA, GAy, GAz, GIt, EIy, EIz; // stiffness
+	// The stiffness is separated at each node in order to implement the end releases and the nodal degrees of freedom
+	// Additionally it will be possible to introduce separate plastic behavior at the ends
+	private double EA0, GAy0, GAz0, GIt0, EIy0, EIz0; // stiffness at start node
+	private double EA1, GAy1, GAz1, GIt1, EIy1, EIz1; // stiffness at end node
+	private double l, ax, ay, az; // length and rotation in global system
 			
 	public Beam(int index, Section sect, double angle, Node[] nodes) {
 		this.setIndex(index);
@@ -28,20 +32,138 @@ public class Beam extends Element {
 	
 	public void setProperties() {
 		Node[] nd = getNodes();
-		l = sqrt(pow(nd[0].getX()-nd[1].getX(),2)+pow(nd[0].getY()-nd[1].getY(),2)+pow(nd[0].getZ()-nd[1].getZ(),2));
-		EA = ( getSect().getMat().getE() ) * ( getSect().getA() );
-		GAy = ( getSect().getMat().getG() ) * ( getSect().getAy() );
-		GAz = ( getSect().getMat().getG() ) * ( getSect().getAz() );
-		GIt = ( getSect().getMat().getE() ) * ( getSect().getIt() );
-		EIy = ( getSect().getMat().getE() ) * ( getSect().getIy() );
-		EIz = ( getSect().getMat().getE() ) * ( getSect().getIz() );
+		
+		double dx = nd[1].getX()-nd[0].getX();
+		double dy = nd[1].getY()-nd[0].getY();
+		double dz = nd[1].getZ()-nd[0].getZ();
+		
+		l = sqrt(dx*dx+dy*dy+dz*dz);
+		
+		ax = acos(dx/l);
+		ay = acos(dy/l);
+		az = acos(dz/l);
+		
+		if (!isReleaseStartPX()) EA0 = ( getSect().getMat().getE() ) * ( getSect().getA() );
+		if (!isReleaseEndPX()) EA1 = ( getSect().getMat().getE() ) * ( getSect().getA() );
+		
+		if (!isReleaseStartPY()) GAy0 = ( getSect().getMat().getG() ) * ( getSect().getAy() ); 
+		if (!isReleaseEndPY()) GAy1 = ( getSect().getMat().getG() ) * ( getSect().getAy() );
+		
+		if (!isReleaseStartPZ()) GAz0 = ( getSect().getMat().getG() ) * ( getSect().getAz() ); 
+		if (!isReleaseEndPZ()) GAz1 = ( getSect().getMat().getG() ) * ( getSect().getAz() );
+		
+		if (!isReleaseStartMX()) GIt0 = ( getSect().getMat().getE() ) * ( getSect().getIt() ); 
+		if (!isReleaseEndMX()) GIt1 = ( getSect().getMat().getE() ) * ( getSect().getIt() );
+		
+		if (!isReleaseStartMY()) EIy0 = ( getSect().getMat().getE() ) * ( getSect().getIy() );
+		if (!isReleaseEndMY()) EIy1 = ( getSect().getMat().getE() ) * ( getSect().getIy() );
+		
+		if (!isReleaseStartMZ()) EIz0 = ( getSect().getMat().getE() ) * ( getSect().getIz() );
+		if (!isReleaseEndMZ()) EIz1 = ( getSect().getMat().getE() ) * ( getSect().getIz() );
 	}
 	
 	public double getLength() {
 		return l;
 	}
 	
-	private boolean releasePX, releasePY, releasePZ, releaseMX, releaseMY, releaseMZ; 
+	private boolean releaseStartPX, releaseStartPY, releaseStartPZ, releaseStartMX, releaseStartMY, releaseStartMZ;
+	private boolean releaseEndPX, releaseEndPY, releaseEndPZ, releaseEndMX, releaseEndMY, releaseEndMZ;
+	
+	public boolean isReleaseStartPX() {
+		return releaseStartPX;
+	}
+
+	public void setReleaseStartPX(boolean releaseStartPX) {
+		this.releaseStartPX = releaseStartPX;
+	}
+
+	public boolean isReleaseStartPY() {
+		return releaseStartPY;
+	}
+
+	public void setReleaseStartPY(boolean releaseStartPY) {
+		this.releaseStartPY = releaseStartPY;
+	}
+
+	public boolean isReleaseStartPZ() {
+		return releaseStartPZ;
+	}
+
+	public void setReleaseStartPZ(boolean releaseStartPZ) {
+		this.releaseStartPZ = releaseStartPZ;
+	}
+
+	public boolean isReleaseStartMX() {
+		return releaseStartMX;
+	}
+
+	public void setReleaseStartMX(boolean releaseStartMX) {
+		this.releaseStartMX = releaseStartMX;
+	}
+
+	public boolean isReleaseStartMY() {
+		return releaseStartMY;
+	}
+
+	public void setReleaseStartMY(boolean releaseStartMY) {
+		this.releaseStartMY = releaseStartMY;
+	}
+
+	public boolean isReleaseStartMZ() {
+		return releaseStartMZ;
+	}
+
+	public void setReleaseStartMZ(boolean releaseStartMZ) {
+		this.releaseStartMZ = releaseStartMZ;
+	}
+
+	public boolean isReleaseEndPX() {
+		return releaseEndPX;
+	}
+
+	public void setReleaseEndPX(boolean releaseEndPX) {
+		this.releaseEndPX = releaseEndPX;
+	}
+
+	public boolean isReleaseEndPY() {
+		return releaseEndPY;
+	}
+
+	public void setReleaseEndPY(boolean releaseEndPY) {
+		this.releaseEndPY = releaseEndPY;
+	}
+
+	public boolean isReleaseEndPZ() {
+		return releaseEndPZ;
+	}
+
+	public void setReleaseEndPZ(boolean releaseEndPZ) {
+		this.releaseEndPZ = releaseEndPZ;
+	}
+
+	public boolean isReleaseEndMX() {
+		return releaseEndMX;
+	}
+
+	public void setReleaseEndMX(boolean releaseEndMX) {
+		this.releaseEndMX = releaseEndMX;
+	}
+
+	public boolean isReleaseEndMY() {
+		return releaseEndMY;
+	}
+
+	public void setReleaseEndMY(boolean releaseEndMY) {
+		this.releaseEndMY = releaseEndMY;
+	}
+
+	public boolean isReleaseEndMZ() {
+		return releaseEndMZ;
+	}
+
+	public void setReleaseEndMZ(boolean releaseEndMZ) {
+		this.releaseEndMZ = releaseEndMZ;
+	}	
 		
 	public double getLocalAngle_DEG() {
 		return localAngle*180./Math.PI;
@@ -57,30 +179,6 @@ public class Beam extends Element {
 	
 	public void setLocalAngle_RAD(double rad) {
 		this.localAngle = rad;
-	}
-
-	public boolean isReleaseMX() {
-		return releaseMX;
-	}
-
-	public void setReleaseMX(boolean releaseMX) {
-		this.releaseMX = releaseMX;
-	}
-
-	public boolean isReleaseMY() {
-		return releaseMY;
-	}
-
-	public void setReleaseMY(boolean releaseMY) {
-		this.releaseMY = releaseMY;
-	}
-
-	public boolean isReleaseMZ() {
-		return releaseMZ;
-	}
-
-	public void setReleaseMZ(boolean releaseMZ) {
-		this.releaseMZ = releaseMZ;
 	}
 
 	public double[][] getLocalStiffnessMatrix_GlobalSystem() {
@@ -101,8 +199,8 @@ public class Beam extends Element {
 	private double[][] transformationMatrix;
 	private double[][] transformationMatrix_T;
 		
-	private void setTransformationMatrix() {
-		// to Do: code!		
+	public void setTransformationMatrix() {
+		// to Do : code!		
 	}
 	
 	public double[][] getLocalStiffnessMatrix_LocalSystem() {
@@ -112,50 +210,65 @@ public class Beam extends Element {
 	public void setLocalStiffnessMatrix_LocalSystem() {		
 		for (int x=0; x<12; x++) for (int y=0; y<12; y++) localStiffnessMatrix_LocalSystem[x][y]=0;
 		
-		double fy = 12*EIz/(GAy*l*l);
-		double fz = 12*EIy/(GAz*l*l);
-		double k22 = 12*EIz / ( pow(l,3)*(1+fy) );
-		double k33 = 12*EIy / ( pow(l,3)*(1+fz) );
-		double k55 = (4+fz)*EIy / ( l*(1+fz) );
-		double k66 = (4+fy)*EIz / ( l*(1+fy) );
-		double k68 = 6*EIz / ( l*l*(1+fy) );
-		double k59 = 6*EIy / ( l*l*(1+fz) );
-		double k511 = (2+fz)*EIy / ( l*(1+fz) );
-		double k612 = (2+fy)*EIz / ( l*(1+fy) );
+		// The last "s" means "start" node
+		double fys = 12*EIz0/(GAy0*l*l);
+		double fzs = 12*EIy0/(GAz0*l*l);
+		double k22s = 12*EIz0 / ( pow(l,3)*(1+fys) );
+		double k33s = 12*EIy0 / ( pow(l,3)*(1+fzs) );
+		double k55s = (4+fzs)*EIy0 / ( l*(1+fzs) );
+		double k66s = (4+fys)*EIz0 / ( l*(1+fys) );
+		double k68s = 6*EIz0 / ( l*l*(1+fys) );
+		double k59s = 6*EIy0 / ( l*l*(1+fzs) );
+		double k511s = (2+fzs)*EIy0 / ( l*(1+fzs) );
+		double k612s = (2+fys)*EIz0 / ( l*(1+fys) );
 		
-		localStiffnessMatrix_LocalSystem[0][0] = EA/l;
-		localStiffnessMatrix_LocalSystem[1][1] = k22*cos(localAngle) + k33*sin(localAngle);   
-		localStiffnessMatrix_LocalSystem[2][2] = k33*cos(localAngle) + k22*sin(localAngle);  
-		localStiffnessMatrix_LocalSystem[3][3] = GIt/l;
-		localStiffnessMatrix_LocalSystem[4][4] = k55*cos(localAngle) + k66*sin(localAngle);
-		localStiffnessMatrix_LocalSystem[5][5] = k66*cos(localAngle) + k55*sin(localAngle);
-		localStiffnessMatrix_LocalSystem[4][2] = -k59*cos(localAngle) - k68*sin(localAngle);
-		localStiffnessMatrix_LocalSystem[5][1] = -k68*cos(localAngle) - k59*sin(localAngle);
+		//The last "f" means "end" node
+		double fye = 12*EIz1/(GAy1*l*l);
+		double fze = 12*EIy1/(GAz1*l*l);
+		double k22e = 12*EIz1 / ( pow(l,3)*(1+fye) );
+		double k33e = 12*EIy1 / ( pow(l,3)*(1+fze) );
+		double k55e = (4+fze)*EIy1 / ( l*(1+fze) );
+		double k66e = (4+fye)*EIz1 / ( l*(1+fye) );
+		double k68e = 6*EIz1 / ( l*l*(1+fye) );
+		double k59e = 6*EIy1 / ( l*l*(1+fze) );
+		double k511e = (2+fze)*EIy1 / ( l*(1+fze) );
+		double k612e = (2+fye)*EIz1 / ( l*(1+fye) );
 		
-		for (int x=0; x<3; x++) for (int y=0; y<3; y++) {
-			localStiffnessMatrix_LocalSystem[x+6][y] = -localStiffnessMatrix_LocalSystem[x][y];
-			localStiffnessMatrix_LocalSystem[x][y+6] = -localStiffnessMatrix_LocalSystem[x][y];
-			localStiffnessMatrix_LocalSystem[x+6][y+6] = localStiffnessMatrix_LocalSystem[x][y];
-		}
-		for (int x=3; x<6; x++) for (int y=0; y<3; y++) {
-			localStiffnessMatrix_LocalSystem[x+6][y] = localStiffnessMatrix_LocalSystem[x][y];
-			localStiffnessMatrix_LocalSystem[x][y+6] = -localStiffnessMatrix_LocalSystem[x][y];
-			localStiffnessMatrix_LocalSystem[x+6][y+6] = -localStiffnessMatrix_LocalSystem[x][y];
-		}
-		for (int x=0; x<3; x++) for (int y=3; y<6; y++) {
-			localStiffnessMatrix_LocalSystem[x+6][y] = -localStiffnessMatrix_LocalSystem[x][y];
-			localStiffnessMatrix_LocalSystem[x][y+6] = localStiffnessMatrix_LocalSystem[x][y];
-			localStiffnessMatrix_LocalSystem[x+6][y+6] = -localStiffnessMatrix_LocalSystem[x][y];
-		}
-		for (int x=3; x<6; x++) for (int y=3; y<6; y++) {
-			localStiffnessMatrix_LocalSystem[x+6][y+6] = localStiffnessMatrix_LocalSystem[x][y];
-		}
-		localStiffnessMatrix_LocalSystem[9][3] = -GIt/l;
-		localStiffnessMatrix_LocalSystem[10][4] = k511*cos(localAngle) + k612*sin(localAngle);
-		localStiffnessMatrix_LocalSystem[11][5] = k612*cos(localAngle) + k511*sin(localAngle);
-		for (int x=9; x<12; x++) for (int y=3; y<6; y++) {
-			localStiffnessMatrix_LocalSystem[x-6][y+6] = localStiffnessMatrix_LocalSystem[x][y];
-		}
+		localStiffnessMatrix_LocalSystem[0][0] = EA0/l;
+		localStiffnessMatrix_LocalSystem[1][1] = k22s*cos(localAngle) + k33s*sin(localAngle);   
+		localStiffnessMatrix_LocalSystem[2][2] = k33s*cos(localAngle) + k22s*sin(localAngle);  
+		localStiffnessMatrix_LocalSystem[3][3] = GIt0/l;
+		localStiffnessMatrix_LocalSystem[4][4] = k55s*cos(localAngle) + k66s*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[5][5] = k66s*cos(localAngle) + k55s*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[4][2] = -k59s*cos(localAngle) - k68s*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[5][1] = -k68s*cos(localAngle) - k59s*sin(localAngle);
+		
+		localStiffnessMatrix_LocalSystem[6][0] = -EA1/l;
+		localStiffnessMatrix_LocalSystem[7][1] = -k22e*cos(localAngle) - k33e*sin(localAngle);   
+		localStiffnessMatrix_LocalSystem[8][2] = -k33e*cos(localAngle) - k22e*sin(localAngle);  
+		localStiffnessMatrix_LocalSystem[9][3] = -GIt1/l;
+		localStiffnessMatrix_LocalSystem[10][4] = k511e*cos(localAngle) + k612e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[11][5] = k612e*cos(localAngle) + k511e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[10][2] = -k59e*cos(localAngle) - k68e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[11][1] = -k68e*cos(localAngle) - k59e*sin(localAngle);
+		
+		localStiffnessMatrix_LocalSystem[0][6] = -EA0/l;
+		localStiffnessMatrix_LocalSystem[1][7] = -k22s*cos(localAngle) - k33s*sin(localAngle);   
+		localStiffnessMatrix_LocalSystem[2][8] = -k33s*cos(localAngle) - k22s*sin(localAngle);  
+		localStiffnessMatrix_LocalSystem[3][9] = -GIt0/l;
+		localStiffnessMatrix_LocalSystem[4][10] = k511e*cos(localAngle) + k612e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[5][11] = k612e*cos(localAngle) + k511e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[4][8] = k59s*cos(localAngle) + k68s*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[5][7] = k68s*cos(localAngle) + k59s*sin(localAngle);
+		
+		localStiffnessMatrix_LocalSystem[6][6] = EA1/l;
+		localStiffnessMatrix_LocalSystem[7][7] = k22e*cos(localAngle) + k33e*sin(localAngle);   
+		localStiffnessMatrix_LocalSystem[8][8] = k33e*cos(localAngle) + k22e*sin(localAngle);  
+		localStiffnessMatrix_LocalSystem[9][9] = GIt1/l;
+		localStiffnessMatrix_LocalSystem[10][10] = k55e*cos(localAngle) + k66e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[11][11] = k66e*cos(localAngle) + k55e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[10][8] = -k59e*cos(localAngle) - k68e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[11][7] = -k68e*cos(localAngle) - k59e*sin(localAngle);
 				  
 	}
 	
