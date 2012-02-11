@@ -8,7 +8,7 @@ import java.util.Vector;
  * all the elements that can be implemented in 
  * the global stiffness matrix.
  * 
- * @author Manos Bairaktaris
+ * @author Manos Bairaktaris  (manos.bairaktaris@gmail.com)
  *
  */
 public abstract class Element {

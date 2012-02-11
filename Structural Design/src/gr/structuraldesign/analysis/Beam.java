@@ -2,23 +2,31 @@ package gr.structuraldesign.analysis;
 
 import static java.lang.Math.*;
 
+/**
+ * The Beam is a subclass of Element. It is a standard beam 
+ * that develops all internal forces (N,Vy,Vz,T,My,Mz)
+ * and its local stiffness matrix is formed by taking into
+ * account the effect of the shear.
+ * 
+ * @author Manos Bairaktaris  (manos.bairaktaris@gmail.com)
+ *
+ */
 public class Beam extends Element {
 	
 	private double localAngle;
 	
-	//private double EA, GAy, GAz, GIt, EIy, EIz; // stiffness
 	// The stiffness is separated at each node in order to implement the end releases and the nodal degrees of freedom
 	// Additionally it will be possible to introduce separate plastic behavior at the ends
 	private double EA0, GAy0, GAz0, GIt0, EIy0, EIz0; // stiffness at start node
 	private double EA1, GAy1, GAz1, GIt1, EIy1, EIz1; // stiffness at end node
-	private double l, ax, ay, az; // length and rotation in global system
+	private double l, dx, dy, dz; // length and rotation in global system
 			
 	public Beam(int index, Section sect, double angle, Node[] nodes) {
 		this.setIndex(index);
 		setSect(sect);
 		Node[] nodesToKeep = new Node[2];
 		if (nodes.length>2) {
-			System.out.printf("\n Beam %d is defined with more than 2 nodes.\n Extra nodes are ignored\n", index);			
+			System.out.printf("\n Beam %d is defined with more than 2 nodes.\n The extra nodes are ignored\n", index);			
 		}
 		nodesToKeep[0] = nodes[0];
 		nodesToKeep[1] = nodes[1];
@@ -39,9 +47,7 @@ public class Beam extends Element {
 		
 		l = sqrt(dx*dx+dy*dy+dz*dz);
 		
-		ax = acos(dx/l);
-		ay = acos(dy/l);
-		az = acos(dz/l);
+		EA0=EA1=GAy0=GAy1=GAz0=GAz1=GIt0=GIt1=EIy0=EIy1=EIz0=EIz1=0;
 		
 		if (!isReleaseStartPX()) EA0 = ( getSect().getMat().getE() ) * ( getSect().getA() );
 		if (!isReleaseEndPX()) EA1 = ( getSect().getMat().getE() ) * ( getSect().getA() );
@@ -198,9 +204,49 @@ public class Beam extends Element {
 	private double[][] localStiffnessMatrix_LocalSystem = new double[12][12];
 	private double[][] transformationMatrix;
 	private double[][] transformationMatrix_T;
-		
+	
+	/**
+	 * The transformation matrix is set by defining 
+	 * the direction cosines.
+	 * The naming convention is
+	 * cosLG, where:
+	 * L means local axis (x,y,z)
+	 * G means global axis (X,Y,Z)
+	 * Their definition takes into account the localAngle
+	 * which if set 0, the local z axis faces towards the 
+	 * global Z
+	 */
 	public void setTransformationMatrix() {
-		// to Do : code!		
+		// Direction cosines for the Axial Force and the Torsion
+		double cosxX = dx/l;
+		double cosxY = dy/l;
+		double cosxZ = dz/l;	
+		
+		double cosyX = -cosxY * cos(localAngle);
+		double cosyY = cosxX * cos(localAngle);
+		double cosyZ = cosxZ * cos(localAngle);
+		
+		double coszX = cosxX * cos(localAngle);
+		double coszY = cosxY * cos(localAngle);
+		double coszZ = -sin(Math.acos(cosxZ)) * cos(localAngle);
+		
+		double[][] tempMatrix = 
+			{  { cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 },
+			   { cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 },
+			   { coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ},
+			   {    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ},
+			   {    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ},
+			   { cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 },
+			   { cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 },
+			   { coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ},
+			   {    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ},
+			   {    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ}  };
+		
+		transformationMatrix = tempMatrix;
+		transformationMatrix_T = MathExtension.matrixTranspose(transformationMatrix);
+		
 	}
 	
 	public double[][] getLocalStiffnessMatrix_LocalSystem() {
@@ -211,8 +257,8 @@ public class Beam extends Element {
 		for (int x=0; x<12; x++) for (int y=0; y<12; y++) localStiffnessMatrix_LocalSystem[x][y]=0;
 		
 		// The last "s" means "start" node
-		double fys = 12*EIz0/(GAy0*l*l);
-		double fzs = 12*EIy0/(GAz0*l*l);
+		double fys = 12*EIz0 / (GAy0*l*l);
+		double fzs = 12*EIy0 / (GAz0*l*l);
 		double k22s = 12*EIz0 / ( pow(l,3)*(1+fys) );
 		double k33s = 12*EIy0 / ( pow(l,3)*(1+fzs) );
 		double k55s = (4+fzs)*EIy0 / ( l*(1+fzs) );

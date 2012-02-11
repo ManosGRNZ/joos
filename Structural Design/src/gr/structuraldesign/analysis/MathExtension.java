@@ -3,14 +3,14 @@ package gr.structuraldesign.analysis;
 /**
  * This class provides mathematics tools through static methods.    
  * 
- * @author Manos Bairaktaris
+ * @author Manos Bairaktaris  (manos.bairaktaris@gmail.com)
  *
  */
 public class MathExtension {
 	
 	/**
 	 * This method returns the area of a polygon based on the
-	 * coordinates of its vertices. NOT TESTED YET
+	 * coordinates of its vertices. NOT TESTED YET!
 	 * @param x array of x coordinates
 	 * @param y array of y coordinates
 	 * @return Area of the polygon (double) (returns -1 if there is a problem with the number of coordinates) 
@@ -97,7 +97,14 @@ public class MathExtension {
 	public static double[][] matrixInverse(double[][] mat) {
 		int x,y,line;
 		int dim = mat.length;
-		double[][] matrix = mat.clone();  // All changes are made to a temporary matrix
+		
+		double[][] matrix = new double[dim][dim];  // All changes are made to a temporary matrix
+		for (x=0; x<dim; x++) { 
+			for (y=0; y<dim; y++) { 
+				matrix[x][y] = mat[x][y];
+			}
+		}
+		
 		double[][] reverse = new double[dim][dim];
 		
 		// Set reverse=I
