@@ -3,7 +3,7 @@ package gr.structuraldesign.analysis;
 /**
  * This class provides mathematics tools through static methods.    
  * 
- * @author Manos Bairaktaris  (manos.bairaktaris@gmail.com)
+ * @author Manos Bairaktaris  (bairaktaris@gmail.com)
  *
  */
 public class MathExtension {
@@ -11,6 +11,7 @@ public class MathExtension {
 	/**
 	 * This method returns the area of a polygon based on the
 	 * coordinates of its vertices. NOT TESTED YET!
+	 * It should become public after testing
 	 * @param x array of x coordinates
 	 * @param y array of y coordinates
 	 * @return Area of the polygon (double) (returns -1 if there is a problem with the number of coordinates) 
@@ -31,7 +32,12 @@ public class MathExtension {
 		return area;
 	}
 	
-	public static double matrixDeterminant(double[][] matrix) {
+	public static double matrixDeterminant(double[][] matrix) throws ArithmeticException {
+		if (matrix.length!=matrix[0].length) {
+			System.err.println("Matrix is not square");
+			ArithmeticException e = new ArithmeticException();
+			throw e;
+		}
 		int d = matrix.length;		
 		int sign;
 		double[][] reduced = new double[d-1][d-1];
@@ -45,8 +51,7 @@ public class MathExtension {
 				if ((i%2)==0) sign=1; else sign=-1;				
 				det += sign*matrix[i][0]*matrixDeterminant(reduced);  // recursive use of matrixDeterminant
 			}			
-		}
-		
+		}		
 		return det;
 	}
 	
@@ -62,7 +67,12 @@ public class MathExtension {
 		return b;
 	}
 	
-	public static double[][] matrixTranspose(double[][] matrix) {
+	public static double[][] matrixTranspose(double[][] matrix) throws ArithmeticException {
+		if (matrix.length!=matrix[0].length) {
+			System.err.println("Matrix is not square");
+			ArithmeticException e = new ArithmeticException();
+			throw e;
+		}
 		int dim = matrix.length;
 		double[][] transpose = new double[dim][dim];
 		
@@ -73,7 +83,13 @@ public class MathExtension {
 		return transpose;
 	}
 	
-	public static double[][] multiplyMatrices(double[][] A, double[][] B) {
+	public static double[][] multiplyMatrices(double[][] A, double[][] B) throws ArithmeticException {
+		if (A[0].length!=B.length) {
+			System.err.println("Problem with matrices dimensions \n" +
+					"A[xa][ya], B[xb][yb] : xa!=yb");
+			ArithmeticException e = new ArithmeticException();
+			throw e;
+		}
 		int x,y;
 		double num=0;
 		double[][] multResult = new double[B.length][A[0].length];
@@ -94,7 +110,12 @@ public class MathExtension {
 	 * @param matrix
 	 * @return double[][]
 	 */
-	public static double[][] matrixInverse(double[][] mat) {
+	public static double[][] matrixInverse(double[][] mat) throws ArithmeticException {
+		if (mat.length!=mat[0].length) {
+			System.err.println("Matrix is not square");
+			ArithmeticException e = new ArithmeticException();
+			throw e;
+		}
 		int x,y,line;
 		int dim = mat.length;
 		
@@ -136,5 +157,16 @@ public class MathExtension {
 		
 		return reverse;
 	} 
+	
+	public static double[] eigenValues(double[][] matrix) throws ArithmeticException {
+		if (matrix.length!=matrix[0].length) {
+			System.err.println("Matrix is not square");
+			ArithmeticException e = new ArithmeticException();
+			throw e;
+		}
+		double[] lamda = new double[matrix.length];
+		
+		return lamda;
+	}
 
 }

@@ -1,8 +1,5 @@
 package gr.structuraldesign.analysis;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 
 public class Node {
@@ -34,7 +31,7 @@ public class Node {
 	 * Should be updated for every created element.
 	 * This should implemented within each Element object 
 	 */
-	public ArrayList<Element> connectedElements = new ArrayList<>();
+	public ArrayList<Element> connectedElements = new ArrayList<Element>();
 	
 	public int getIndex() {
 		return index;

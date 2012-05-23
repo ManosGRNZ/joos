@@ -1,5 +1,7 @@
 package gr.structuraldesign.analysis;
 
+import java.io.Serializable;
+
 /**
  * Definition for sections
  * The perimeter nodes are defined with y,z
@@ -7,10 +9,10 @@ package gr.structuraldesign.analysis;
  * possible holes are defined with yi and zi. These are 2D arrays
  * because there could be more than one hole
  * 
- * @author Manos G. Bairaktaris
+ * @author Manos G. Bairaktaris (bairaktaris@gmail.com)
  *
  */
-public class Section {
+public class Section implements Serializable {
 	
 	private Material Mat;
 
@@ -30,20 +32,31 @@ public class Section {
 	/**
 	 * Section without holes
 	 */
-	public Section(Material m, double[] y0, double[] z0) {
-		Mat = m;
+	public Section(Material material, double[] y0, double[] z0) {
+		Mat = material;
 		y = y0;
 		z = z0;
 	}
 	
-	public Section(Material m, double[] y0, double[] z0, double[][] y1, double[][] z1) {
-		Mat = m;
+	public Section(Material material, double[] y0, double[] z0, double[][] y1, double[][] z1) {
+		Mat = material;
 		y = y0;
 		z = z0;
 		yi = y1;
 		zi = z1;
 	}
-
+	
+	public Section (Material material, double A,double Ay,double Az,double Iy,double Iz,double Iyz,double It) {
+		this.A = A;
+		this.Ay = Ay;
+		this.Az = Az;
+		this.Iy = Iy;
+		this.Iz = Iz;
+		this.Iyz = Iyz;
+		this.It = It;
+		this.Mat = material;
+	}
+		
 	public Material getMat() {
 		return Mat;
 	}

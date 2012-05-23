@@ -1,14 +1,11 @@
 package gr.structuraldesign.analysis;
 
-import java.security.KeyStore.Builder;
-import java.util.Vector;
-
 /**
  * This abstract class form the basis for
  * all the elements that can be implemented in 
  * the global stiffness matrix.
  * 
- * @author Manos Bairaktaris  (manos.bairaktaris@gmail.com)
+ * @author Manos Bairaktaris  (bairaktaris@gmail.com)
  *
  */
 public abstract class Element {

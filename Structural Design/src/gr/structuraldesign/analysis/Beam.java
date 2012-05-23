@@ -8,7 +8,7 @@ import static java.lang.Math.*;
  * and its local stiffness matrix is formed by taking into
  * account the effect of the shear.
  * 
- * @author Manos Bairaktaris  (manos.bairaktaris@gmail.com)
+ * @author Manos Bairaktaris  (bairaktaris@gmail.com)
  *
  */
 public class Beam extends Element {
@@ -268,7 +268,7 @@ public class Beam extends Element {
 		double k511s = (2+fzs)*EIy0 / ( l*(1+fzs) );
 		double k612s = (2+fys)*EIz0 / ( l*(1+fys) );
 		
-		//The last "f" means "end" node
+		//The last "e" means "end" node
 		double fye = 12*EIz1/(GAy1*l*l);
 		double fze = 12*EIy1/(GAz1*l*l);
 		double k22e = 12*EIz1 / ( pow(l,3)*(1+fye) );
@@ -315,6 +315,8 @@ public class Beam extends Element {
 		localStiffnessMatrix_LocalSystem[11][11] = k66e*cos(localAngle) + k55e*sin(localAngle);
 		localStiffnessMatrix_LocalSystem[10][8] = -k59e*cos(localAngle) - k68e*sin(localAngle);
 		localStiffnessMatrix_LocalSystem[11][7] = -k68e*cos(localAngle) - k59e*sin(localAngle);
+		
+		printBeamLocalStiffnessMatrix();
 				  
 	}
 	
@@ -323,6 +325,16 @@ public class Beam extends Element {
 		transformationMatrix_T = MathExtension.matrixTranspose(tempMatrix);
 		tempMatrix = MathExtension.multiplyMatrices(transformationMatrix_T, getLocalStiffnessMatrix_LocalSystem());
 		localStiffnessMatrix_GlobalSystem = MathExtension.multiplyMatrices(tempMatrix, transformationMatrix);		
+	}
+	
+	private void printBeamLocalStiffnessMatrix() {
+		System.out.println("\nThis is the local stiffness matrix of beam: "+this.toString());
+		for (int y=0; y<12; y++) {
+			for (int x=0; x<12; x++) {
+				System.out.printf("%12.2e", this.localStiffnessMatrix_LocalSystem[x][y]);
+			}
+			System.out.print("\n");
+		}
 	}
 	
 }

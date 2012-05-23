@@ -1,13 +1,15 @@
 package gr.structuraldesign.analysis;
 
+import java.io.Serializable;
+
 /**
  * This is a class containing general data for materials
  * It supports only very basic nonlinear data.  
- * @author Manos Bairaktaris
+ * @author Manos Bairaktaris (bairaktaris@gmail.com)
  *
  */
 
-public class Material {
+public class Material implements Serializable {
 	
 	private double E,Eh,G,v;
 	private double yieldStrain;
