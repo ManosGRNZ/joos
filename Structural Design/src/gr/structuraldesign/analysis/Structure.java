@@ -21,6 +21,10 @@ import java.util.ArrayList;
  */
 public class Structure implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ArrayList<Node> buildingNodes = new ArrayList<Node>();
 	private ArrayList<Element> buildingElements = new ArrayList<Element>();
 	private ArrayList<Section> buildingSections = new ArrayList<Section>();
@@ -30,9 +34,11 @@ public class Structure implements Serializable {
 	private StiffnessMatrix structureStiffnessMatrix;
 	
 	public void setStructureStiffnessMatrix() {
-		this.structureStiffnessMatrix = new 
-				StiffnessMatrix( buildingNodes.toArray(new Node[buildingNodes.size()]), 
-						buildingElements.toArray(new Element[buildingElements.size()]));
+		Node[] nd = new Node[buildingNodes.size()];
+		buildingNodes.toArray(nd);
+		Element[] el = new Element[buildingElements.size()];
+		buildingElements.toArray(el);
+		this.structureStiffnessMatrix = new StiffnessMatrix( nd, el );
 	}
 	
 	private String[] getParameters(String line) {
@@ -199,7 +205,7 @@ public class Structure implements Serializable {
 			String line;
 			String[] word;
 						
-			int index=1;
+			int index=0;
 			double x,y,z;
 			String degreeOfFreedom;
 						
@@ -207,11 +213,11 @@ public class Structure implements Serializable {
 				word = getParameters(line);				
 				x = Double.parseDouble(word[0]);
 				y = Double.parseDouble(word[1]);
-				z = Double.parseDouble(word[2]);
-				degreeOfFreedom = word[3];				
+				z = Double.parseDouble(word[2]);								
 				buildingNodes.add(new Node(index,x,y,z));
 				
 				if (word.length>3) for (int i=3; i<word.length; i++) {
+					degreeOfFreedom = word[i];
 					if (degreeOfFreedom=="FIX") {
 						buildingNodes.get(index).setRestrainAllD(true);
 						buildingNodes.get(index).setRestrainAllM(true);
@@ -274,7 +280,7 @@ public class Structure implements Serializable {
 							
 				switch (elementType) {
 				case BEAM:
-					buildingElements.add(new Beam(sectionIndex,sect,localAngle,nodes));
+					buildingElements.add(new Beam(index,sect,localAngle,nodes));
 					break;
 				
 				default:

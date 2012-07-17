@@ -3,6 +3,7 @@
 	<name>Structural Design</name>
 	<comment></comment>
 	<projects>
+		<project>BaistengConcrete</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -36,14 +36,15 @@ public class Beam extends Element {
 		setTransformationMatrix();
 		setLocalStiffnessMatrix_LocalSystem();
 		setLocalStiffnessMatrix_GlobalSystem();
+		//printBeamGlobalStiffnessMatrix();
 	}
 	
 	public void setProperties() {
 		Node[] nd = getNodes();
 		
-		double dx = nd[1].getX()-nd[0].getX();
-		double dy = nd[1].getY()-nd[0].getY();
-		double dz = nd[1].getZ()-nd[0].getZ();
+		dx = nd[1].getX()-nd[0].getX();
+		dy = nd[1].getY()-nd[0].getY();
+		dz = nd[1].getZ()-nd[0].getZ();
 		
 		l = sqrt(dx*dx+dy*dy+dz*dz);
 		
@@ -222,31 +223,48 @@ public class Beam extends Element {
 		double cosxY = dy/l;
 		double cosxZ = dz/l;	
 		
-		double cosyX = -cosxY * cos(localAngle);
-		double cosyY = cosxX * cos(localAngle);
-		double cosyZ = cosxZ * cos(localAngle);
+		double cosyX = l * cos(MathExtension.angleInLevel(dx, dy)-PI/2);
+		double cosyY = l * sin(MathExtension.angleInLevel(dx, dy)-PI/2);
+		double cosyZ = 0;		
 		
-		double coszX = cosxX * cos(localAngle);
-		double coszY = cosxY * cos(localAngle);
-		double coszZ = -sin(Math.acos(cosxZ)) * cos(localAngle);
+		double coszX = dx;
+		double coszY = dy;
+		double coszZ;
+		if (cosxX==0 && cosxY==0) {
+			coszZ = 0;
+			coszY = l;
+		} else {
+			coszZ = tan(PI/2-acos(cosxZ)) * sqrt(cosxX*cosxX+cosxY*cosxY);
+		}				
+		// Direction cosines follow the rule: cosx^2+cosy^2+cosz^2=1
+		double lcos = sqrt(coszX*coszX+coszY*coszY+coszZ*coszZ);
+		coszX /= lcos;
+		coszY /= lcos;
+		coszZ /= lcos;
+		
+		// TO DO: 
 		
 		double[][] tempMatrix = 
-			{  { cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 },
-			   { cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 },
-			   { coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 },
-			   {    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ},
-			   {    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ},
-			   {    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ},
-			   { cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 },
-			   { cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 },
-			   { coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 },
-			   {    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ},
-			   {    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ},
-			   {    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 , coszX, coszY, coszZ}  };
+			{  { cosxX, cosxY, cosxZ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 },
+			   { cosyX, cosyY, cosyZ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 },
+			   { coszX, coszY, coszZ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 ,    0 ,    0 ,    0 , coszX, coszY, coszZ,    0 ,    0 ,    0 },
+			   {    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 , cosxX, cosxY, cosxZ },
+			   {    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 , cosyX, cosyY, cosyZ },
+			   {    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 ,    0 , coszX, coszY, coszZ }
+			};
 		
+				   
 		transformationMatrix = tempMatrix;
 		transformationMatrix_T = MathExtension.matrixTranspose(transformationMatrix);
 		
+		AssistanceMethods.printMatrix2D("\n"+this.toString()+" transformation matrix", 
+				transformationMatrix);
 	}
 	
 	public double[][] getLocalStiffnessMatrix_LocalSystem() {
@@ -314,27 +332,21 @@ public class Beam extends Element {
 		localStiffnessMatrix_LocalSystem[10][10] = k55e*cos(localAngle) + k66e*sin(localAngle);
 		localStiffnessMatrix_LocalSystem[11][11] = k66e*cos(localAngle) + k55e*sin(localAngle);
 		localStiffnessMatrix_LocalSystem[10][8] = -k59e*cos(localAngle) - k68e*sin(localAngle);
-		localStiffnessMatrix_LocalSystem[11][7] = -k68e*cos(localAngle) - k59e*sin(localAngle);
+		localStiffnessMatrix_LocalSystem[11][7] = -k68e*cos(localAngle) - k59e*sin(localAngle);	
 		
-		printBeamLocalStiffnessMatrix();
-				  
+		AssistanceMethods.printMatrix2D("\n"+this.toString()+" Local Beam Matrix - local coordinates:", 
+				localStiffnessMatrix_LocalSystem);
 	}
 	
 	public void setLocalStiffnessMatrix_GlobalSystem() {
-		double[][] tempMatrix = transformationMatrix.clone();
-		transformationMatrix_T = MathExtension.matrixTranspose(tempMatrix);
-		tempMatrix = MathExtension.multiplyMatrices(transformationMatrix_T, getLocalStiffnessMatrix_LocalSystem());
-		localStiffnessMatrix_GlobalSystem = MathExtension.multiplyMatrices(tempMatrix, transformationMatrix);		
+		//double[][] tempMatrix = AssistanceMethods.copy2Darray(transformationMatrix);
+		double[][] tempMatrix = MathExtension.multiplyMatrices(transformationMatrix_T, getLocalStiffnessMatrix_LocalSystem());
+		localStiffnessMatrix_GlobalSystem = MathExtension.multiplyMatrices(tempMatrix, transformationMatrix);
+		AssistanceMethods.printMatrix2D("\n"+this.toString()+" Local beam matrix - global coordinates", 
+				localStiffnessMatrix_GlobalSystem);
 	}
 	
-	private void printBeamLocalStiffnessMatrix() {
-		System.out.println("\nThis is the local stiffness matrix of beam: "+this.toString());
-		for (int y=0; y<12; y++) {
-			for (int x=0; x<12; x++) {
-				System.out.printf("%12.2e", this.localStiffnessMatrix_LocalSystem[x][y]);
-			}
-			System.out.print("\n");
-		}
-	}
-	
+	public String toString() {
+		return String.format("Beam %1d (%1s)\n", this.getIndex(), super.toString());
+	}	
 }

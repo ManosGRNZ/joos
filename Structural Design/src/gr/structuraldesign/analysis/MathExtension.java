@@ -10,7 +10,7 @@ public class MathExtension {
 	
 	/**
 	 * This method returns the area of a polygon based on the
-	 * coordinates of its vertices. NOT TESTED YET!
+	 * coordinates of its vertices. ***NOT TESTED YET!***
 	 * It should become public after testing
 	 * @param x array of x coordinates
 	 * @param y array of y coordinates
@@ -119,12 +119,7 @@ public class MathExtension {
 		int x,y,line;
 		int dim = mat.length;
 		
-		double[][] matrix = new double[dim][dim];  // All changes are made to a temporary matrix
-		for (x=0; x<dim; x++) { 
-			for (y=0; y<dim; y++) { 
-				matrix[x][y] = mat[x][y];
-			}
-		}
+		double[][] matrix = AssistanceMethods.copy2Darray(mat);
 		
 		double[][] reverse = new double[dim][dim];
 		
@@ -156,7 +151,34 @@ public class MathExtension {
 		} // close for line
 		
 		return reverse;
-	} 
+	}
+	
+	public static double getSign(double x) {
+		if (x==0) {
+			return 0;
+		} else {
+			return x/Math.abs(x);
+		}
+	}
+	
+	/**
+	 * This method returns the angle in RAD for a 2D vector.
+	 * Using atan could provide the wrong angle for a>PI/2
+	 * @param dx
+	 * @param dy
+	 * @return angle in rad
+	 */
+	public static double angleInLevel(double dx, double dy) {
+		double a;
+		if (dx==0) {
+			a = getSign(dy) * Math.PI/2.0;
+		} else {
+			a = Math.atan(dy/dx);
+		}		
+		if (dx<0 && dy>0) a = Math.PI-a;
+		if (dx<0 && dy<0) a = Math.PI+a;
+		return a;
+	}
 	
 	public static double[] eigenValues(double[][] matrix) throws ArithmeticException {
 		if (matrix.length!=matrix[0].length) {

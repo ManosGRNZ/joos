@@ -56,10 +56,10 @@ public abstract class Element {
 	public double[][] transformationMatrix;
 	
 	/**
-	 * This is a class that all element should implement in
+	 * This is a method that all elements should implement in
 	 * order to be able to add it to the Global System Matrix.
 	 * The local system and the transformation matrices are
-	 * not included, since they are left in the programming
+	 * not included. They are left in the programming
 	 * freedom of the subclasses.
 	 */
 	abstract public void setLocalStiffnessMatrix_GlobalSystem();
