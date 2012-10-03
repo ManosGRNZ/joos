@@ -12,7 +12,7 @@ public class GenTest {
 		
 	public static void main(String[] args) {		
 		GenTest test = new GenTest();
-		test.setup_linux();		
+		test.setup_win();		
 	}
 	
 	private void setup_linux() {
